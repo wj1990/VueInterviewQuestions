@@ -144,9 +144,255 @@ Vue.prototype.data = function() {
 
 15.v-for 与 v-if 的优先级?
 ----
-v-for比v-if优先，如果每一次都需要遍历整个数组，将会影响速度，尤其是当之需要渲染很小一部分的时候.
+v-for比v-if优先，如果每一次都需要遍历整个数组，将会影响速度，尤其是当之需要渲染很小一部分的时候.  
+  
+16.vue中子组件调用父组件的方法?
+----
+（1） 
+父组件 ----<child @fatherMethod="fatherMethod"></child>  
+子组件 ---- this.$emit('fatherMethod');  
+（2）  
+父组件方法通过props传给子组件 然后子组件接受 调用  
+（3）  
+this.$parent.fatherMethod();  
 
-16.
+17.vue中 keep-alive 组件的作用?
+----
+在vue项目中,难免会有列表页面,点击某个结果之后,返回回来时,如果不对结果页面进行缓存,那么返回列表页面的时候会回到初始状态,但是我们想要的结果是返回时这个页面还是之前搜索的结果列表,这时候就需要用到vue的keep-alive技术。  
+
+<keep-alive>  
+  <component>  
+    <!-- 该组件将被缓存！ -->  
+  </component>  
+</keep-alive>  
+
+include - 字符串或正则表达，只有匹配的组件会被缓存  
+<keep-alive include="a">
+  <component>
+    <!-- name 为 a 的组件将被缓存！ -->
+  </component>
+</keep-alive>
+
+<keep-alive exclude="a">
+  <component>
+    <!-- 除了 name 为 a 的组件都将被缓存！ -->  
+  </component>  
+</keep-alive>  
+
+<keep-alive>  
+    <router-view>  
+        <!-- 所有路径匹配到的视图组件都会被缓存！ -->
+    </router-view>  
+</keep-alive>  
+
+{  
+    path: '/',    
+    name: 'home',  
+    component: Home,  
+    meta: {  
+      keepAlive: true // 需要被缓存  
+    }  
+}  
+
+<keep-alive>  
+    <router-view v-if="$route.meta.keepAlive">  
+        <!-- 这里是会被缓存的视图组件，比如 Home！ -->  
+    </router-view>  
+</keep-alive>  
+
+18.vue中编写可复用的组件？
+----  
+高内聚：从功能角度来度量模块内的联系，一个好的内聚模块应当恰好做一件事。它描述的是模块内的功能联系；  
+低耦合：耦合组件之间关联程度的一种度量，低耦合即做到模块之间关联不大；
+
+1.规范化命名：组件的命名应该跟业务无关，而是依据组件的功能命名。  
+2.数据扁平化：定义组件接口时，尽量不要将整个对象作为一个 prop 传进来。每个 prop 应该是一个简单类型的数据。这样做有下列几点好处：  
+   (1) 组件接口清晰。(2) props 校验方便。(3) 当服务端返回的对象中的 key 名称与组件接口不一样时，不需要重新构造一个对象。  
+扁平化的 props 能让我们更直观地理解组件的接口。  
+3.可复用组件只实现 UI 相关的功能，即展示、交互、动画，如何获取数据跟它无关，因此不要在组件内部去获取数据。  
+4.可复用组件应尽量减少对外部条件的依赖。 
+5.组件在功能独立的前提下应该尽量简单，越简单的组件可复用性越强。  
+6.组件应具有一定的容错性。  
+
+19.vue生命周期?
+---
+beforeCreate: new Vue()   data:undefined  el:undefined  
+created: data存在 el:undefined 编译模板为虚拟dom放入到render函数中
+beforeMount： data存在 el存在  
+mounted ：完成挂载  
+beforeUpdate: 更新之前 数据更新时调用，发生在虚拟 DOM 重新渲染之前 
+updated:更新之后  
+beforeDestroy:销毁之前  
+destroyed:销毁之后  
+
+20.vue如何监听键盘事件中的按键？
+----
+@keyup.13="submit"  
+@keyup.enter="submit"  
+ .enter  
+ .tab  
+ .delete (捕获“删除”和“退格”键)  
+ .esc  
+ .space  
+ .up  
+ .down  
+ .left  
+ .right  
+ 
+ 修饰键：    
+
+ .ctrl  
+ .alt  
+ .shift  
+ .meta  
+按下Alt + 释放C触发  
+@keyup.alt.67="clear"  
+
+对于elementUI的input，我们需要在后面加上.native, 因为elementUI对input进行了封装，原生的事件不起作用。    
+el-input v-model="form.name" placeholder="昵称" @keyup.enter.native="submit"  
+
+21.vue更新数组时触发视图更新的方法（更新对象同理）？
+----
+Vue.set(target,key,value)
+target: 对象或者数组 
+key: string|数字 
+(1)
+this.$set(array, indexOfItem, newValue) 
+(2)
+this.$delete(target,key)
+target: 对象或者数组
+key: string|数字 
+this.$delete(array, indexOfItem) 
+(3)
+this.array.splice(index, 1)
+
+22.解决非工程化项目初始化页面闪动问题？
+----
+[v-cloak] {  display: none; }    
+div id="app" v-cloak 
+
+23.v-model语法糖的使用?
+----
+input type="checkbox" v-bind:checked="checked"  
+checked数据修改了，那么DOM属性就会修改;   
+如果DOM属性修改了，checked数据并不会修改;    
+
+解决：  
+ input type="checkbox" v-bind:checked="checked" @change="change"  ref="dom"  
+
+change(){  
+    this.checked = this.$refs.dom.checked  
+}  
+
+总结：这样做也太麻烦了，鉴于双向绑定也比较常用的，因此vue引入了一个指令v-model,可以使用它简化此工作：  
+input type="checkbox" v-model="checked"  
+
+24.单页面应用优缺点?
+---
+优点：  
+1、具有桌面应用的即时性、网站的可移植性和可访问性。  
+2、用户体验好、快，内容的改变不需要重新加载整个页面。  
+3、基于上面一点，SPA相对对服务器压力小。  
+4、良好的前后端分离。SPA和RESTful架构一起使用，后端不再负责模板渲染、输出页面工作，web前端和各种移动终端地位对等，后端API通用化。  
+5、同一套后端程序代码，不用修改就可以用于Web界面、手机、平板等多种客户端；  
+
+缺点：    
+1、不利于SEO。（如果你看中SEO，那就不应该在页面上使用JavaScript，你应该使用网站而不是Web应用）    
+2、初次加载耗时相对增多。    
+3、导航不可用，如果一定要导航需要自行实现前进、后退。   
+
+25.vue提供的几种脚手架模板?
+---
+webpack：基于 webpack 和 vue-loader 的目录结构，而且支持热部署、代码检查、测试及 css 抽取。  
+webpack-simple：基于 webpack 和 vue-loader 的目录结构。  
+browerify：基于 Browerfiy 和 vueify(作用于 vue-loader 类似)的结构，支持热部署、代码检查及单元测试。  
+browerify-simple：基于 Browerfiy 和 vueify 的结构。  
+simple：单个引入 Vue.js 的 index.html 页面。  
+
+26.vue-cli开发环境使用全局常量？
+----
+第一步，在 src 下新建 const 文件夹下 新建 const.js  
+├── src  
+│   ├── const  
+│   │    ├── const.js  
+│   │     
+│   └── main.js  
+└── ...  
+第二步，如何在 const.js 文件下，设置常量  
+export default {
+    install(Vue,options){
+        Vue.prototype.global = {
+            title:'全局',
+            isBack: true,
+            isAdd:  false,
+        }; 
+    }
+ }
+第三步，在 main.js 下全局引入：  
+//引入全局常量  
+import constant from './const/const.js'  
+Vue.use(constant);  
+//通过js方式使用：  
+this.global.title  
+//或在 html 结构中使用  
+{{global.title}}  
+
+27.vue-cli生产环境使用全局常量?
+---
+第一步，在 static 下新建 config.js：  
+├── 项目路径  
+│   ├── static  
+│   │___├── config.js  
+
+第二步，在 config.js 里面设置全局变量：  
+window.g = {  
+    PUBLIC_IP  : "http://10.10.10.10:8080"  
+}  
+
+第三步，在 index.html 里面引入：  
+<script type="text/javascript" src="./static/config.js"></script>  
+
+第四步，在其他 .js 文件中即可使用：  
+window.g.PUBLIC_IP  
+
+第五步，打包后修改：  
+通过 npm run build 命令打包后，此 config.js 文件会被打包到 dist/static文件夹下，  
+此时如果需要修改 PUBLIC_IP，打开config.js即可修改，无需重新打包！  
+
+28.vue弹窗后如何禁止滚动条滚动？
+----
+methods : {  
+   //禁止滚动  
+   stop(){  
+        var mo=function(e){e.preventDefault();};  
+        document.body.style.overflow='hidden';  
+        document.addEventListener("touchmove",mo,false);//禁止页面滑动  
+    },  
+    //滑动限制取消  
+    move(){  
+        var mo=function(e){e.preventDefault();};
+        document.body.style.overflow='';//出现滚动条  
+        document.removeEventListener("touchmove",mo,false);  
+    }  
+}  
+
+29.计算属性的缓存和方法调用的区别?
+---
+计算属性必须返回结果  
+计算属性是基于它的依赖缓存的。一个计算属性所依赖的数据发生变化时，它才会重新取值。  
+使用计算属性还是methods取决于是否需要缓存，当遍历大数组和做大量计算时，应当使用计算属性，除非你不希望得到缓存。  
+计算属性是根据依赖自动执行的，methods需要事件调用。  
+
+30.
+
+
+
+
+
+
+
+
+
 
 
 
